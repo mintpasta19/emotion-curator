@@ -1,5 +1,5 @@
 import streamlit as st
-from emotion_analyzer import analyze_emotion_with_model
+from emotion_analyzer import analyze_emotion_advanced
 from image_generator import ImageGenerator
 from music_recommender import MusicRecommender
 import os
@@ -210,7 +210,7 @@ with col1:
                     os.environ["SPOTIFY_CLIENT_SECRET"] = spotify_secret
                     
                     # 감정 분석
-                    emotions = analyze_emotion_with_model(user_text)
+                    emotions = analyze_emotion_advanced(user_text,  method='sentence_avg')
                     main_emotion = max(emotions.items(), key=lambda x: x[1])
                     
                     result = {

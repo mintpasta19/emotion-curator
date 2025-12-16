@@ -76,7 +76,7 @@ def analyze_emotion_with_model(text, model_path='emotion_model_best.pth'):
     model.eval()
     
     # 토크나이저
-    tokenizer = AutoTokenizer.from_pretrained('monologg/kobert')
+    tokenizer = AutoTokenizer.from_pretrained('monologg/kobert', trust_remote_code=True)
     
     # 텍스트를 문장으로 분리
     sentences = split_sentences(text)

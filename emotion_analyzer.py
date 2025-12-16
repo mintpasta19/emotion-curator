@@ -308,3 +308,4 @@ def analyze_emotion_advanced(text, model_path='emotion_model_best.pth',
         print(f"  {emotion}: {score:.1f}%")
     
     return final_emotions
+

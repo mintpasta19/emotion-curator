@@ -210,7 +210,7 @@ with col1:
                     os.environ["SPOTIFY_CLIENT_SECRET"] = spotify_secret
                     
                     # 감정 분석
-                    emotions = analyze_emotion_advanced(user_text,  method='sentence_avg')
+                    emotions = analyze_emotion_advanced(user_text, method='weighted')
                     main_emotion = max(emotions.items(), key=lambda x: x[1])
                     
                     result = {

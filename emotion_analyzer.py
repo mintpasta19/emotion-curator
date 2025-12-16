@@ -56,7 +56,8 @@ def analyze_emotion_with_model(text, model_path='emotion_model_best.pth'):
     # 모델 로드
     model = BertForSequenceClassification.from_pretrained(
         'monologg/kobert',
-        num_labels=6
+        num_labels=6,
+        trust_remote_code=True
     )
     
     # 학습된 가중치 로드

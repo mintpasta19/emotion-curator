@@ -4,6 +4,7 @@ from image_generator import ImageGenerator
 from music_recommender import MusicRecommender
 import os
 
+
 # 페이지 설정
 st.set_page_config(
     page_title="Emotion Curator",
@@ -11,6 +12,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 
 # API 키 로드 함수
 def load_api_keys():
@@ -29,6 +31,7 @@ def load_api_keys():
         spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
     
     return huggingface_key, spotify_client_id, spotify_client_secret
+
 
 # CSS 스타일
 st.markdown("""
@@ -96,13 +99,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # 헤더
 st.markdown("<h1>🎭 Emotion Curator</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>감정을 예술로 표현합니다</p>", unsafe_allow_html=True)
 
+
 # 세션 상태 초기화
 if 'result' not in st.session_state:
     st.session_state.result = None
+
 
 # 사이드바 설정
 with st.sidebar:
@@ -167,8 +173,10 @@ with st.sidebar:
     st.markdown("---")
     st.caption("💡 Tip: 다양한 스타일을 시도해보세요!")
 
+
 # 메인 레이아웃
 col1, col2 = st.columns([1, 1], gap="large")
+
 
 # 왼쪽: 입력 섹션
 with col1:
@@ -234,13 +242,14 @@ with col1:
                         )
                         result['image_path'] = image_path
                     
-                    # 음악 추천
+                    # 🆕 음악 추천 (비율 기반!)
                     if recommend_music:
                         try:
                             music_rec = MusicRecommender()
-                            tracks = music_rec.recommend_music(
-                                main_emotion[0], 
-                                limit=num_tracks
+                            # ✅ 변경: recommend_music_by_emotions 사용
+                            tracks = music_rec.recommend_music_by_emotions(
+                                emotions,  # 모든 감정 비율 전달
+                                total_tracks=num_tracks
                             )
                             result['music'] = tracks
                         except Exception as e:
@@ -255,6 +264,7 @@ with col1:
                     st.info("API 키를 확인해주세요.")
         else:
             st.warning("⚠️ 감정을 입력해주세요!")
+
 
 # 오른쪽: 결과 섹션
 with col2:
@@ -314,24 +324,40 @@ with col2:
         
         st.markdown("---")
         
-        # 음악 추천
+        # 🆕 음악 추천 (감정별 그룹화)
         if result['music']:
             st.markdown("### 🎵 추천 음악")
-            st.caption(f"{result['main_emotion']} 감정에 어울리는 음악")
             
-            for i, track in enumerate(result['music'], 1):
-                with st.expander(f"🎵 {i}. {track['name']} - {track['artist']}", expanded=(i==1)):
-                    col_img, col_info = st.columns([1, 3])
-                    
-                    with col_img:
-                        if track.get('image'):
-                            st.image(track['image'], width=120)
-                    
-                    with col_info:
-                        st.markdown(f"**아티스트:** {track['artist']}")
-                        if track.get('album'):
-                            st.markdown(f"**앨범:** {track['album']}")
-                        st.markdown(f"[🎧 Spotify에서 듣기]({track['url']})")
+            # 감정별로 그룹화
+            emotion_groups = {}
+            for track in result['music']:
+                emotion = track.get('emotion', result['main_emotion'])
+                if emotion not in emotion_groups:
+                    emotion_groups[emotion] = []
+                emotion_groups[emotion].append(track)
+            
+            # 전체 곡 수 표시
+            st.caption(f"총 {len(result['music'])}곡 추천 (감정 비율 기반)")
+            
+            # 감정별로 표시
+            for emotion, tracks in emotion_groups.items():
+                emotion_icon = emotion_emoji.get(emotion, '🎭')
+                
+                with st.expander(f"{emotion_icon} {emotion} ({len(tracks)}곡)", expanded=True):
+                    for i, track in enumerate(tracks, 1):
+                        col_track, col_btn = st.columns([4, 1])
+                        
+                        with col_track:
+                            st.markdown(f"**{i}. {track['name']}**")
+                            st.caption(f"🎤 {track['artist']}")
+                            if track.get('popularity'):
+                                st.caption(f"🔥 인기도: {track['popularity']}/100")
+                        
+                        with col_btn:
+                            st.markdown(f"[듣기 🎧]({track['url']})")
+                        
+                        if i < len(tracks):  # 마지막 곡이 아니면 구분선
+                            st.markdown("---")
     
     else:
         # 초기 상태
@@ -347,6 +373,7 @@ with col2:
             </p>
         </div>
         """, unsafe_allow_html=True)
+
 
 # 푸터
 st.markdown("---")
